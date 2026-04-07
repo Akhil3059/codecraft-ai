@@ -1,0 +1,65 @@
+import os
+import json
+from dotenv import load_dotenv
+from langchain_core.messages import HumanMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
+from state import CodeCrafterState
+
+load_dotenv()
+
+
+def frontend_agent(state: CodeCrafterState) -> CodeCrafterState:
+    frontend_outputs = {}
+
+    try:
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash-lite",
+            google_api_key=os.getenv("GEMINI_API_KEY_4")
+        )
+
+        services = state.get("services", [])
+        features = state.get("features", [])
+
+        for service in services:
+            prompt = f"""
+Generate React frontend code for this service.
+
+Service: {service}
+Features: {features}
+
+Return ONLY valid JSON:
+{{
+  "filename": "{service}.jsx",
+  "content": "React component with API calls"
+}}
+"""
+
+            try:
+                response = llm.invoke([HumanMessage(content=prompt)])
+                content = response.content.strip()
+
+                content = content.replace("```json", "").replace("```", "").strip()
+                parsed = json.loads(content)
+
+            except Exception:
+                parsed = {
+                    "filename": f"{service}.jsx",
+                    "content": f"// frontend stub for {service}"
+                }
+
+            frontend_outputs[service] = parsed
+
+        return {
+            **state,
+            "frontend_outputs": frontend_outputs,
+            "frontend_complete": True,
+            "frontend_error": ""
+        }
+
+    except Exception as e:
+        return {
+            **state,
+            "frontend_outputs": {},
+            "frontend_complete": True,
+            "frontend_error": str(e)
+        }
