@@ -9,10 +9,17 @@ def slugify(text: str) -> str:
     return text.strip("_")
 
 
+def normalize(item):
+    """Ensure LLM output is always a dict (handles list issue)."""
+    if isinstance(item, list):
+        return item[0] if item else {}
+    return item or {}
+
+
 def build_project_zip(result):
     zip_buffer = io.BytesIO()
 
-    # 🔥 Dynamic project name
+    # Dynamic project name
     user_story = result.get("user_story", "generated_project")
     project_name = slugify(user_story)[:30] or "generated_project"
 
@@ -24,6 +31,7 @@ def build_project_zip(result):
         # Backend Services
         # -------------------------------
         for service, files in result.get("service_outputs", {}).items():
+            files = normalize(files)
             safe_service = slugify(service)
             base = f"{root}services/{safe_service}/"
 
@@ -35,7 +43,9 @@ def build_project_zip(result):
         # Swagger Docs
         # -------------------------------
         for service, swagger in result.get("swagger_outputs", {}).items():
+            swagger = normalize(swagger)
             safe_service = slugify(service)
+
             zf.writestr(
                 f"{root}swagger/{safe_service}/swagger.yaml",
                 swagger.get("content", "")
@@ -45,10 +55,8 @@ def build_project_zip(result):
         # Tests
         # -------------------------------
         for service, test in result.get("test_outputs", {}).items():
+            test = normalize(test)
             safe_service = slugify(service)
-
-            if isinstance(test, list):
-                test = test[0] if test else {}
 
             filename = test.get("filename", "test.py")
 
@@ -61,10 +69,8 @@ def build_project_zip(result):
         # Frontend
         # -------------------------------
         for service, frontend in result.get("frontend_outputs", {}).items():
+            frontend = normalize(frontend)
             safe_service = slugify(service)
-
-            if isinstance(frontend, list):
-                frontend = frontend[0] if frontend else {}
 
             filename = frontend.get("filename", "app.jsx")
 
