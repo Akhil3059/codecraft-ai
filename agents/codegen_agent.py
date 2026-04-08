@@ -14,8 +14,8 @@ from dotenv import load_dotenv
 
 # api_key = os.getenv("GEMINI_API_KEY_1")
 
-if not api_key:
-    api_key = st.secrets.get("GEMINI_API_KEY_1")
+
+api_key = st.secrets.get("GEMINI_API_KEY_1")
 
 if not api_key:
     raise ValueError("GEMINI_API_KEY_1 is not set")
