@@ -2,7 +2,6 @@ import streamlit as st
 from graph import run_all_agents
 from utils.zip_builder import build_project_zip
 
-
 # -------------------------------
 # Page Configuration
 # -------------------------------
@@ -67,8 +66,6 @@ if submitted and user_story.strip():
     # Success message after generation
     st.success("Generation completed successfully ✅")
 
-   
-
     # -------------------------------
     # Features & Services Section
     # -------------------------------
@@ -131,9 +128,9 @@ if submitted and user_story.strip():
 
     for service, swagger in result.get("swagger_outputs", {}).items():
         with st.expander(service):
-           if isinstance(swagger, list):
-               swagger = swagger[0] if swagger else {}
-           st.code(swagger.get("content", ""), language="yaml")
+            if isinstance(swagger, list):
+                swagger = swagger[0] if swagger else {}
+            st.code(swagger.get("content", ""), language="yaml")
 
     # -------------------------------
     # Unit Tests Section
@@ -143,9 +140,12 @@ if submitted and user_story.strip():
     for service, test in result.get("test_outputs", {}).items():
         with st.expander(service):
             if isinstance(test, list):
-               test = test[0] if test else {}
+                test = test[0] if test else {}
             st.code(test.get("content", ""), language=language.lower())
 
+    # -------------------------------
+    # Frontend Code Section
+    # -------------------------------
     st.subheader("Frontend Code")
 
     for service, frontend in result.get("frontend_outputs", {}).items():
@@ -154,21 +154,44 @@ if submitted and user_story.strip():
                 frontend = frontend[0] if frontend else {}
             st.code(frontend.get("content", ""), language="javascript")
 
+    # -------------------------------
+    # Project Documentation Section
+    # -------------------------------
     st.subheader("Project Documentation")
 
     st.text_area(
-    "Generated Documentation",
-    result.get("documentation_output", ""),
-    height=400
+        "Generated Documentation",
+        result.get("documentation_output", ""),
+        height=400
     )
-    zip_file = build_project_zip(result)
-    st.subheader("Download Project")
 
+# -------------------------------
+# Download Project Section
+# -------------------------------
+st.subheader("Download Project")
+
+# Initialize session state
+if "zip_data" not in st.session_state:
+    st.session_state.zip_data = None
+
+# Generate ZIP only once after result is ready
+if "result" in locals() and result and result.get("service_outputs"):
+    try:
+        zip_file = build_project_zip(result)
+        st.session_state.zip_data = zip_file.getvalue()
+    except Exception as e:
+        st.error(f"Error creating ZIP: {e}")
+
+# Show download button
+if st.session_state.zip_data:
     st.download_button(
-    label="Download Full Project ZIP",
-    data=zip_file.getvalue(), 
-    file_name="project.zip",
-    mime="application/zip"
-)
-   
+        label="📦 Download Full Project ZIP",
+        data=st.session_state.zip_data,
+        file_name="project.zip",
+        mime="application/zip"
+    )
 
+    # Optional debug (you can remove later)
+    st.caption(f"ZIP size: {len(st.session_state.zip_data)} bytes")
+else:
+    st.warning("No files available to download. Please generate project first.")
