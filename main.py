@@ -166,10 +166,9 @@ if submitted and user_story.strip():
 
     st.download_button(
     label="Download Full Project ZIP",
-    data=zip_file,
-    file_name="codecraft_project.zip",
+    data=zip_file.getvalue(), 
+    file_name="project.zip",
     mime="application/zip"
 )
-
-
+   
 
