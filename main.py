@@ -3,6 +3,18 @@ from graph import run_all_agents
 from utils.zip_builder import build_project_zip
 
 # -------------------------------
+# Session State Initialization
+# -------------------------------
+if "result" not in st.session_state:
+    st.session_state.result = None
+
+if "zip_data" not in st.session_state:
+    st.session_state.zip_data = None
+
+if "generated" not in st.session_state:
+    st.session_state.generated = False
+
+# -------------------------------
 # Page Configuration
 # -------------------------------
 st.set_page_config(
@@ -12,7 +24,7 @@ st.set_page_config(
 )
 
 # -------------------------------
-# Sidebar Branding / Logos
+# Sidebar
 # -------------------------------
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/4712/4712109.png", width=120)
@@ -22,12 +34,11 @@ with st.sidebar:
     st.info("Generate production-ready microservices using AI")
 
 # -------------------------------
-# Header Section
+# Header
 # -------------------------------
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
-    # Main logo (top-left)
     st.image("https://cdn-icons-png.flaticon.com/512/2721/2721268.png", width=80)
 
 with col_title:
@@ -35,64 +46,72 @@ with col_title:
     st.caption("Design scalable microservices instantly with AI 🤖")
 
 # -------------------------------
-# Input Form Section
+# Input Form
 # -------------------------------
 with st.form("codecraft_form"):
-    # User story input field
     user_story = st.text_area(
         "Enter User Story",
         height=150,
         placeholder="e.g., Build an e-commerce order management system..."
     )
 
-    # Language selection dropdown
     language = st.selectbox(
         "Select Language",
         ["Java", "NodeJS", ".NET", "Python", "Go", "Ruby", "PHP", "Kotlin"]
     )
 
-    # Submit button
     submitted = st.form_submit_button("Generate Microservices")
 
 # -------------------------------
-# Main Processing Logic
+# Generate Logic
 # -------------------------------
 if submitted and user_story.strip():
-
-    # Show loading spinner while AI generates output
     with st.spinner("Generating microservices..."):
         result = run_all_agents(user_story, language)
 
-    # Success message after generation
+    st.session_state.result = result
+    st.session_state.generated = True
+
+    # 🔥 Generate ZIP ONLY ONCE
+    try:
+        zip_file = build_project_zip(result)
+        st.session_state.zip_data = zip_file.getvalue()
+    except Exception as e:
+        st.error(f"ZIP Error: {e}")
+
+# -------------------------------
+# Use stored result
+# -------------------------------
+result = st.session_state.result or {}
+
+if st.session_state.generated:
+
     st.success("Generation completed successfully ✅")
 
     # -------------------------------
-    # Features & Services Section
+    # Features & Services
     # -------------------------------
     st.subheader("Features & Services")
 
     col1, col2 = st.columns(2)
 
-    # Display extracted features
     with col1:
         st.markdown("### Features")
         for i, feature in enumerate(result.get("features", []), 1):
             st.write(f"{i}. {feature}")
 
-    # Display generated services
     with col2:
         st.markdown("### Services")
         for i, service in enumerate(result.get("services", []), 1):
             st.code(f"{i}. {service}")
 
     # -------------------------------
-    # Architecture Configuration
+    # Architecture
     # -------------------------------
     arch = result.get("architecture_config", {})
 
     if arch:
         st.subheader("Architecture Configuration")
-
         st.write("Architecture:", arch.get("architecture", ""))
         st.write("Database:", arch.get("database", ""))
         st.write("Messaging:", arch.get("messaging", ""))
@@ -101,28 +120,23 @@ if submitted and user_story.strip():
         st.write("Service Discovery:", arch.get("service_discovery", ""))
 
     # -------------------------------
-    # Generated Code Preview
+    # Code Preview
     # -------------------------------
     st.subheader("Generated Code Preview")
 
-    # Loop through each service and show generated files
     for service, files in result.get("service_outputs", {}).items():
         with st.expander(service):
-
-            # Controller Layer Code
             st.markdown("### Controller")
             st.code(files.get("controller_code", ""), language=language.lower())
 
-            # Service Layer Code
             st.markdown("### Service")
             st.code(files.get("service_code", ""), language=language.lower())
 
-            # Model Layer Code
             st.markdown("### Model")
             st.code(files.get("model_code", ""), language=language.lower())
 
     # -------------------------------
-    # Swagger Documentation Section
+    # Swagger
     # -------------------------------
     st.subheader("Swagger Documentation")
 
@@ -133,7 +147,7 @@ if submitted and user_story.strip():
             st.code(swagger.get("content", ""), language="yaml")
 
     # -------------------------------
-    # Unit Tests Section
+    # Tests
     # -------------------------------
     st.subheader("Unit Tests")
 
@@ -144,7 +158,7 @@ if submitted and user_story.strip():
             st.code(test.get("content", ""), language=language.lower())
 
     # -------------------------------
-    # Frontend Code Section
+    # Frontend
     # -------------------------------
     st.subheader("Frontend Code")
 
@@ -155,7 +169,7 @@ if submitted and user_story.strip():
             st.code(frontend.get("content", ""), language="javascript")
 
     # -------------------------------
-    # Project Documentation Section
+    # Documentation
     # -------------------------------
     st.subheader("Project Documentation")
 
@@ -166,32 +180,26 @@ if submitted and user_story.strip():
     )
 
 # -------------------------------
-# Download Project Section
+# Download Section (FINAL FIX)
 # -------------------------------
 st.subheader("Download Project")
 
-# Initialize session state
-if "zip_data" not in st.session_state:
-    st.session_state.zip_data = None
+if st.session_state.generated:
 
-# Generate ZIP only once after result is ready
-if "result" in locals() and result and result.get("service_outputs"):
-    try:
-        zip_file = build_project_zip(result)
-        st.session_state.zip_data = zip_file.getvalue()
-    except Exception as e:
-        st.error(f"Error creating ZIP: {e}")
+    if st.session_state.zip_data:
+        st.download_button(
+            label="📦 Download Full Project ZIP",
+            data=st.session_state.zip_data,
+            file_name="codecraft_project.zip",
+            mime="application/zip",
+            key="download_zip"
+        )
 
-# Show download button
-if st.session_state.zip_data:
-    st.download_button(
-        label="📦 Download Full Project ZIP",
-        data=st.session_state.zip_data,
-        file_name="project.zip",
-        mime="application/zip"
-    )
+        # Debug
+        st.caption(f"ZIP size: {len(st.session_state.zip_data)} bytes")
 
-    # Optional debug (you can remove later)
-    st.caption(f"ZIP size: {len(st.session_state.zip_data)} bytes")
+    else:
+        st.error("ZIP file not generated ❌")
+
 else:
-    st.warning("No files available to download. Please generate project first.")
+    st.warning("Generate project first ⚠️")
