@@ -5,14 +5,20 @@ from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 # from langchain_groq import ChatGroq
 from state import CodeCrafterState, get_file_extension
-from langsmith import traceable
+
+import os
 import streamlit as st
+from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-api_key = st.secrets["GEMINI_API_KEY_1"]
-@traceable(
-    name="codegen_agent",
+api_key = os.getenv("GEMINI_API_KEY_1")
+
+if not api_key:
+    api_key = st.secrets.get("GEMINI_API_KEY_1")
+
+if not api_key:
+    raise ValueError("GEMINI_API_KEY_1 is not set")
    
 )
 def codegen_agent(state: CodeCrafterState) -> CodeCrafterState:
@@ -21,7 +27,7 @@ def codegen_agent(state: CodeCrafterState) -> CodeCrafterState:
     try:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
-            google_api_key=api_key,
+            api_key=api_key,
             # model="llama-3.1-8b-instant",
             # api_key=os.getenv("GROQ_API_KEY")
         )
