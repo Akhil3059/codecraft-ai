@@ -20,7 +20,6 @@ if not api_key:
 if not api_key:
     raise ValueError("GEMINI_API_KEY_1 is not set")
    
-)
 def codegen_agent(state: CodeCrafterState) -> CodeCrafterState:
     service_files = {}
 
