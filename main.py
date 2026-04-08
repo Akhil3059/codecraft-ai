@@ -2,7 +2,10 @@ import streamlit as st
 from graph import run_all_agents
 from utils.zip_builder import build_project_zip
 
+import os
+import streamlit as st
 
+st.write("API KEY:", os.getenv("GEMINI_API_KEY_1"))
 # -------------------------------
 # Page Configuration
 # -------------------------------
