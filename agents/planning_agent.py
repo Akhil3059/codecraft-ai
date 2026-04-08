@@ -8,6 +8,7 @@ from state import CodeCrafterState
 from langsmith import traceable
 
 load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
 
 
 def extract_json(text: str):
@@ -26,7 +27,7 @@ def planning_agent(state: CodeCrafterState) -> CodeCrafterState:
     try:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
-            google_api_key=os.getenv("GEMINI_API_KEY_1"),
+            google_api_key=api_key,
             temperature=0
         )
 
