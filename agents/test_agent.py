@@ -1,21 +1,15 @@
 import os
 import json
 from typing import Dict, Any
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from state import CodeCrafterState, get_file_extension
-from langsmith import traceable
 import streamlit as st
 
-load_dotenv(override=True)
+api_key = st.secrets.get("GEMINI_API_KEY_1")
 
-api_key = st.secrets["GEMINI_API_KEY_1"]
 
-@traceable(
-    name="test_agent",
-   
-)
 def generate_tests(state: CodeCrafterState) -> CodeCrafterState:
    
 
