@@ -131,7 +131,9 @@ if submitted and user_story.strip():
 
     for service, swagger in result.get("swagger_outputs", {}).items():
         with st.expander(service):
-            st.code(swagger.get("content", ""), language="yaml")
+           if isinstance(swagger, list):
+               swagger = swagger[0] if swagger else {}
+           st.code(swagger.get("content", ""), language="yaml")
 
     # -------------------------------
     # Unit Tests Section
@@ -140,12 +142,16 @@ if submitted and user_story.strip():
 
     for service, test in result.get("test_outputs", {}).items():
         with st.expander(service):
+            if isinstance(test, list):
+               test = test[0] if test else {}
             st.code(test.get("content", ""), language=language.lower())
 
     st.subheader("Frontend Code")
 
     for service, frontend in result.get("frontend_outputs", {}).items():
         with st.expander(service):
+            if isinstance(frontend, list):
+                frontend = frontend[0] if frontend else {}
             st.code(frontend.get("content", ""), language="javascript")
 
     st.subheader("Project Documentation")
