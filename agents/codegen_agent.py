@@ -7,9 +7,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from state import CodeCrafterState, get_file_extension
 from langsmith import traceable
 
-load_dotenv()
+load_dotenv(override=True)
 
-api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
+api_key = st.secrets["GEMINI_API_KEY_1"]
 @traceable(
     name="codegen_agent",
    
