@@ -3,16 +3,14 @@ import json
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
-# from langchain_groq import ChatGroq
+
 from state import CodeCrafterState, get_file_extension
 
 import os
 import streamlit as st
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-# load_dotenv(override=True)
 
-# api_key = os.getenv("GEMINI_API_KEY_1")
 
 
 api_key = st.secrets.get("GEMINI_API_KEY_1")
@@ -27,8 +25,6 @@ def codegen_agent(state: CodeCrafterState) -> CodeCrafterState:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
             api_key=api_key,
-            # model="llama-3.1-8b-instant",
-            # api_key=os.getenv("GROQ_API_KEY")
         )
 
         features = state.get("features", [])
