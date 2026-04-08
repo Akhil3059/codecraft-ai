@@ -4,8 +4,9 @@ from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from state import CodeCrafterState
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
+load_dotenv(override=True)
+
+api_key = st.secrets["GEMINI_API_KEY_1"]
 
 def documentation_agent(state: CodeCrafterState) -> CodeCrafterState:
     try:
