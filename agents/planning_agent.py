@@ -7,8 +7,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from state import CodeCrafterState
 from langsmith import traceable
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
+load_dotenv(override=True)
+
+api_key = st.secrets["GEMINI_API_KEY_1"]
 
 
 def extract_json(text: str):
