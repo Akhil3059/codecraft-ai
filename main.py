@@ -2,6 +2,7 @@ import streamlit as st
 from graph import run_all_agents
 from utils.zip_builder import build_project_zip
 import tempfile
+import os
 
 # -------------------------------
 # Session State Initialization
@@ -11,6 +12,9 @@ if "result" not in st.session_state:
 
 if "generated" not in st.session_state:
     st.session_state.generated = False
+
+if "zip_data" not in st.session_state:
+    st.session_state.zip_data = None
 
 # -------------------------------
 # Page Configuration
@@ -69,6 +73,14 @@ if submitted and user_story.strip():
 
     st.session_state.result = result
     st.session_state.generated = True
+    
+    # Generate ZIP immediately and store in session state
+    try:
+        zip_file = build_project_zip(result)
+        st.session_state.zip_data = zip_file.getvalue()
+    except Exception as e:
+        st.error(f"Error generating ZIP: {e}")
+        st.session_state.zip_data = None
 
 # -------------------------------
 # Use stored result
@@ -171,33 +183,17 @@ if st.session_state.generated:
     )
 
 # -------------------------------
-# Download Section (FINAL FIX)
+# Download Section (FIXED)
 # -------------------------------
 st.subheader("Download Project")
 
-if st.session_state.generated and result:
-
-    try:
-        # 🔥 Save ZIP to temp file (fixes deployment issue)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp:
-            zip_file = build_project_zip(result)
-            tmp.write(zip_file.getvalue())
-            tmp_path = tmp.name
-
-        with open(tmp_path, "rb") as f:
-            zip_bytes = f.read()
-
-        st.download_button(
-            label="📦 Download Full Project ZIP",
-            data=zip_bytes,
-            file_name="codecraft_project.zip",
-            mime="application/zip"
-        )
-
-        st.success("ZIP ready for download ✅")
-
-    except Exception as e:
-        st.error(f"Download Error: {e}")
-
+if st.session_state.generated and st.session_state.zip_data:
+    st.download_button(
+        label="📦 Download Full Project ZIP",
+        data=st.session_state.zip_data,
+        file_name="codecraft_project.zip",
+        mime="application/zip"
+    )
+    st.success("ZIP ready for download ✅")
 else:
     st.warning("Generate project first ⚠️")
