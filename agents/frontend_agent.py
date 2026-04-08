@@ -6,7 +6,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from state import CodeCrafterState
 
 load_dotenv()
-
+api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
 
 def frontend_agent(state: CodeCrafterState) -> CodeCrafterState:
     frontend_outputs = {}
@@ -14,7 +14,7 @@ def frontend_agent(state: CodeCrafterState) -> CodeCrafterState:
     try:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
-            google_api_key=os.getenv("GEMINI_API_KEY_4")
+            google_api_key=api_key,
         )
 
         services = state.get("services", [])
