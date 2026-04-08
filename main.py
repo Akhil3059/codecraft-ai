@@ -182,18 +182,4 @@ if st.session_state.generated:
         height=400
     )
 
-# -------------------------------
-# Download Section (FIXED)
-# -------------------------------
-st.subheader("Download Project")
 
-if st.session_state.generated and st.session_state.zip_data:
-    st.download_button(
-        label="📦 Download Full Project ZIP",
-        data=st.session_state.zip_data,
-        file_name="codecraft_project.zip",
-        mime="application/zip"
-    )
-    st.success("ZIP ready for download ✅")
-else:
-    st.warning("Generate project first ⚠️")
