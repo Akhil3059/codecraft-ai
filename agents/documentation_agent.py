@@ -1,18 +1,18 @@
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from state import CodeCrafterState
 import streamlit as st
-load_dotenv(override=True)
 
-api_key = st.secrets["GEMINI_API_KEY_1"]
+
+api_key = st.secrets.get("GEMINI_API_KEY_1")
 
 def documentation_agent(state: CodeCrafterState) -> CodeCrafterState:
     try:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
-            google_api_key=api_key,
+            api_key=api_key,
         )
 
         services = state.get("services", [])
