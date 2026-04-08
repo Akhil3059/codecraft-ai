@@ -1,15 +1,13 @@
 import streamlit as st
 from graph import run_all_agents
 from utils.zip_builder import build_project_zip
+import tempfile
 
 # -------------------------------
 # Session State Initialization
 # -------------------------------
 if "result" not in st.session_state:
     st.session_state.result = None
-
-if "zip_data" not in st.session_state:
-    st.session_state.zip_data = None
 
 if "generated" not in st.session_state:
     st.session_state.generated = False
@@ -71,13 +69,6 @@ if submitted and user_story.strip():
 
     st.session_state.result = result
     st.session_state.generated = True
-
-    # 🔥 Generate ZIP ONLY ONCE
-    try:
-        zip_file = build_project_zip(result)
-        st.session_state.zip_data = zip_file.getvalue()
-    except Exception as e:
-        st.error(f"ZIP Error: {e}")
 
 # -------------------------------
 # Use stored result
@@ -184,22 +175,29 @@ if st.session_state.generated:
 # -------------------------------
 st.subheader("Download Project")
 
-if st.session_state.generated:
+if st.session_state.generated and result:
 
-    if st.session_state.zip_data:
+    try:
+        # 🔥 Save ZIP to temp file (fixes deployment issue)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp:
+            zip_file = build_project_zip(result)
+            tmp.write(zip_file.getvalue())
+            tmp_path = tmp.name
+
+        with open(tmp_path, "rb") as f:
+            zip_bytes = f.read()
+
         st.download_button(
             label="📦 Download Full Project ZIP",
-            data=st.session_state.zip_data,
+            data=zip_bytes,
             file_name="codecraft_project.zip",
-            mime="application/zip",
-            key="download_zip"
+            mime="application/zip"
         )
 
-        # Debug
-        st.caption(f"ZIP size: {len(st.session_state.zip_data)} bytes")
+        st.success("ZIP ready for download ✅")
 
-    else:
-        st.error("ZIP file not generated ❌")
+    except Exception as e:
+        st.error(f"Download Error: {e}")
 
 else:
     st.warning("Generate project first ⚠️")
