@@ -10,9 +10,9 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+# load_dotenv(override=True)
 
-api_key = os.getenv("GEMINI_API_KEY_1")
+# api_key = os.getenv("GEMINI_API_KEY_1")
 
 if not api_key:
     api_key = st.secrets.get("GEMINI_API_KEY_1")
