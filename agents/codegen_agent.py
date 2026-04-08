@@ -9,7 +9,7 @@ from langsmith import traceable
 
 load_dotenv()
 
-
+api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
 @traceable(
     name="codegen_agent",
    
@@ -20,7 +20,7 @@ def codegen_agent(state: CodeCrafterState) -> CodeCrafterState:
     try:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
-            google_api_key=os.getenv("GEMINI_API_KEY_2")
+            google_api_key=api_key,
             # model="llama-3.1-8b-instant",
             # api_key=os.getenv("GROQ_API_KEY")
         )
