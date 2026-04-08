@@ -8,6 +8,7 @@ from state import CodeCrafterState, get_file_extension
 from langsmith import traceable
 
 load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY_1") or st.secrets["GEMINI_API_KEY_1"]
 
 @traceable(
     name="test_agent",
@@ -21,7 +22,7 @@ def generate_tests(state: CodeCrafterState) -> CodeCrafterState:
     try:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash-lite",
-            google_api_key=os.getenv("GEMINI_API_KEY_4")
+            google_api_key=api_key,
         )
 
         service_outputs = state.get("service_outputs",{})
